@@ -12,8 +12,8 @@ def test_parse3():
         'acquired': {u'Class C Capital Stock': 2901, u'Class A Common Stock': 2768},
         'disposed': {u'Class C Google Stock Units': 5491, u'Class A Google Stock Units': 5491},
         'postTrans': {u'Class C Capital Stock': 1282228, u'Class C Google Stock Units': 21966, u'Class A Common Stock': 32629, u'Class A Google Stock Units': 21966},
-        'sigAquire': [{u'Class A Common Stock': {'transShares': 2768, 'percentage': '8.48%', 'postTransShares': 32629}}],
-        'sigDispose': [{u'Class C Google Stock Units': {'transShares': 5491, 'percentage': '25.00%', 'postTransShares': 21966}}, {u'Class A Google Stock Units': {'transShares': 5491, 'percentage': '25.00%', 'postTransShares': 21966}}]
+        'sigAquire': [{u'Class A Common Stock': {'transShares': 2768, 'percentage': '9.27%', 'postTransShares': 32629}}],
+        'sigDispose': [{u'Class C Google Stock Units': {'transShares': 5491, 'percentage': '20.00%', 'postTransShares': 21966}}, {u'Class A Google Stock Units': {'transShares': 5491, 'percentage': '20.00%', 'postTransShares': 21966}}]
     }
     __verifyFields('data/googtype4.xml', expectation)
 
@@ -42,7 +42,8 @@ def __verifyFields(doc, expectation):
     print "Disposed: ", nonDerivativeTable.getDisposedShares()
     print "PostTrans: ", nonDerivativeTable.getPostTransactionShare()
     sigTrans = nonDerivativeTable.significantTrans(0.01)
-    print "sig trans: ", sigTrans
+    print "sig trans A: ", sigTrans['SignificantAcquired']
+    print "sig trans D: ", sigTrans['SignificantDisposed']
 
     assert reader.getReportDate() == expectation['date']
     assert reader.getIssuer().symbol == expectation['symbol']

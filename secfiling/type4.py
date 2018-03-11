@@ -20,7 +20,7 @@ class Owner:
         addRelationship(self.relationShips, relationshipNode, 'isTenPercentOwner')
         addRelationship(self.relationShips, relationshipNode, 'isOther')
     def __str__(self):
-        return "Owner name: {}, relationShips: {}".format(self.name, self.relationShips)
+        return "Owner: {}, {}".format(self.name, self.relationShips)
 
 class TransactionAmounts:
     def __init__(self, amountNode):
@@ -37,10 +37,32 @@ class PostTransactionAmounts:
     def __str__(self):
         return "PostTransactionAmounts: {}\n".format(self.sharesOwnedFollowingTransaction)
 
+class TransactionCode:
+    CODE = {
+        'P': 'OpenPurchase',
+        'S': 'OpenSale',
+        'V': 'ColuntarilyReport',
+        'A': 'Grant',
+        'D': 'Disposition',
+        'F': 'TaxWithhold',
+        'I': 'DiscretionaryTransaction',
+        'M': 'ExerciseOfConversion',
+        'C': 'Conversion',
+        'E': 'ExpirationShort',
+        'H': 'ExpirationLong',
+        'O': 'ExerciseOTM',
+        'X': 'ExerciseITM'
+    }
+    def __init__(self, code):
+        self.coding = code
+
+    def __str__(self):
+        return self.CODE[self.coding] if self.coding in self.CODE else self.coding
+
 class TransactionCoding:
     def __init__(self, codingNode):
         self.transactionFormType = codingNode.getElementsByTagName('transactionFormType')[0].firstChild.data
-        self.transactionCode = codingNode.getElementsByTagName('transactionCode')[0].firstChild.data
+        self.transactionCode = TransactionCode(codingNode.getElementsByTagName('transactionCode')[0].firstChild.data)
         self.equitySwapInvolved = codingNode.getElementsByTagName('equitySwapInvolved')[0].firstChild.data
         # TODO: read footnote
 
@@ -125,6 +147,7 @@ class NonDerivativeTransactionTable:
     def __getSharesOfOperationType(self, type):
         shares = {}
         for t in filter(lambda e : e.transActionAmount.transactionAcquiredDisposedCode == type, self.transactions):
+#            print t.transActionCoding.transactionCode
             if t.securityTitle in shares:
                 shares[t.securityTitle] += t.transActionAmount.transactionShares
             else:
@@ -133,7 +156,7 @@ class NonDerivativeTransactionTable:
 
 
 class Filing4DocReader:
-    SIG_TRANS_THRESHOLD = 0.05
+    SIG_TRANS_THRESHOLD = 0.1
     def __init__(self, xmlDoc):
         self.doc = xmlDoc
         self.root = minidom.parse(self.doc)
@@ -153,6 +176,20 @@ class Filing4DocReader:
     def getNonDerivativeTransactions(self):
         table = NonDerivativeTransactionTable(self.root.getElementsByTagName('nonDerivativeTable')[0])
         return table
+
+    def reportSigfinicantTrans(self):
+        sigTrans = self.getNonDerivativeTransactions().significantTrans(Filing4DocReader.SIG_TRANS_THRESHOLD)
+        if not sigTrans['SignificantAcquired'] and not sigTrans['SignificantDisposed']:
+            print "skipping ", self.getReportDate(), self.getOwner().name
+            return None
+        else:
+            result = str(self.getReportDate()) + ' ' + str(self.getIssuer().symbol) + ' ' + str(self.getOwner()) + '\n'
+            if sigTrans['SignificantAcquired']:
+                result += 'SignificantAcquired' + str(sigTrans['SignificantAcquired'])
+            if sigTrans['SignificantDisposed']:
+                result += 'SignificantDisposed' +  str(sigTrans['SignificantDisposed'])
+            return result
+
 
 def addRelationship(relationshipList, relationshipNode, relationshipType):
     isType = relationshipNode.getElementsByTagName(relationshipType)[0].firstChild.data

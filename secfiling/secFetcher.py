@@ -5,8 +5,8 @@ import re
 from type4 import *
 from reporter import *
 
-#page='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=4&dateb=&owner=include&count=40&output=atom'
-page='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001652044&type=4&dateb=&owner=include&count=40&output=atom'
+page='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724&type=4&dateb=&owner=include&count=40&output=atom'
+#page='https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001652044&type=4&dateb=&owner=include&count=40&output=atom'
 
 def fetchPage(pageLink):
 #	print "getting page ", pageLink
@@ -46,8 +46,8 @@ def getFilings(companypage, pastNdays):
 def report(result):
     cred = CredentialReader('/tmp/emailCredential.json')
     subscriber = 'zhanglinchi@gmail.com'
-    reporter = EmailReporter(result, cred.getCredentials(), subscriber)
-#    reporter = StdoutReporter(result)
+#    reporter = EmailReporter(result, cred.getCredentials(), subscriber)
+    reporter = StdoutReporter(result)
     reporter.report()
 
 def readType4(item):

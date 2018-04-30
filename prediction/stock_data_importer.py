@@ -44,7 +44,8 @@ def ReadStockData(base_dir):
 
 
 def main():
-    data_store = ReadStockData('C:/Users/Alan/Downloads/quantquote_daily_sp500_83986/daily')
+    datapath ='C:/Users/Alan/Downloads/quantquote_daily_sp500_83986/daily'
+    data_store = ReadStockData(datapath)
     for company_code, nodes in data_store.data.items():
         week_nodes = weekly_data_generator.GenerateWeeklyData(nodes, 20)
         volume_score_list = volume_dry_up_evaluator.ComputeVolumeDryUpScore(week_nodes)
